@@ -18,30 +18,56 @@
 // module.exports = { scanBody };
 
 
-const axios = require('axios');
-const { getRecommendations } = require('../services/recommendationService'); // Assuming this is a function that provides AI recommendations
 
-// Handle body scan request
-const scanBody = async (req, res) => {
+
+// const axios = require('axios');
+// const { getRecommendations } = require('../services/recommendationService'); // Assuming this is a function that provides AI recommendations
+
+// // Handle body scan request
+// const scanBody = async (req, res) => {
+//   try {
+//     const bodyScanData = req.body; // Data sent from frontend (body scan data)
+
+//     // Call the recommendation service to get AI-based outfit suggestions
+//     const recommendations = await getRecommendations(bodyScanData);
+
+//     // Return the processed results, including outfit recommendations
+//     res.json({
+//       success: true,
+//       recommendations: recommendations, // Include AI-generated recommendations
+//     });
+//   } catch (error) {
+//     console.error('Error processing body scan:', error);
+//     res.status(500).json({
+//       success: false,
+//       error: 'Failed to process body scan and generate recommendations',
+//     });
+//   }
+// };
+
+// module.exports = { scanBody };
+
+
+
+const processScan = async (req, res) => {
   try {
-    const bodyScanData = req.body; // Data sent from frontend (body scan data)
+    const { height, weight, dimensions } = req.body;
 
-    // Call the recommendation service to get AI-based outfit suggestions
-    const recommendations = await getRecommendations(bodyScanData);
+    if (!height || !weight || !dimensions) {
+      return res.status(400).json({ error: 'Missing required fields' });
+    }
 
-    // Return the processed results, including outfit recommendations
-    res.json({
-      success: true,
-      recommendations: recommendations, // Include AI-generated recommendations
-    });
+    const recommendations = [
+      { name: "Slim Fit Shirt", size: "M", style: "Formal" },
+      { name: "Denim Jacket", size: "L", style: "Casual" }
+    ];
+
+    res.json({ success: true, recommendations });
   } catch (error) {
-    console.error('Error processing body scan:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Failed to process body scan and generate recommendations',
-    });
+    console.error('Body Scan Error:', error.message);
+    res.status(500).json({ error: 'Failed to process body scan' });
   }
 };
 
-module.exports = { scanBody };
+module.exports = { processScan };
 

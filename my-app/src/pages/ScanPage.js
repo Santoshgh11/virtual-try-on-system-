@@ -193,7 +193,7 @@ const ScanPage = () => {
       } finally {
         setScanningComplete(true); // Mark scanning as complete
       }
-    }, 10000);
+    }, 5000);
 
     return () => clearTimeout(timer); // Clean up the timer
   }, [navigate]);
@@ -218,3 +218,84 @@ const ScanPage = () => {
 };
 
 export default ScanPage;
+
+
+
+
+
+
+// import React, { useState, useEffect } from 'react';
+// import { useNavigate } from 'react-router-dom';
+
+// const ScanPage = () => {
+//   const navigate = useNavigate();
+//   const [scanning, setScanning] = useState(true);
+//   const [errorMessage, setErrorMessage] = useState('');
+
+//   useEffect(() => {
+//     const scanBody = async () => {
+//       try {
+//         const scanData = {
+//           height: 170,
+//           weight: 65,
+//           dimensions: { chest: 90, waist: 70, hips: 95 },
+//         };
+
+//         const response = await fetch('http://localhost:5000/api/scan', {
+//           method: 'POST',
+//           headers: { 'Content-Type': 'application/json' },
+//           body: JSON.stringify(scanData),
+//         });
+
+//         if (!response.ok) {
+//           throw new Error(`HTTP error! Status: ${response.status}`);
+//         }
+
+//         const data = await response.json();
+//         console.log('Scan Successful:', data);
+
+//         setScanning(false);
+//         navigate('/result', { state: { scanResponse: data } });
+
+//       } catch (error) {
+//         console.error('Scan request failed:', error.message);
+//         setErrorMessage('Failed to process the scan. Please try again.');
+//       }
+//     };
+
+//     setTimeout(scanBody, 5000); // Simulate scanning delay
+//   }, [navigate]);
+
+//   return (
+//     <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-r from-gray-100 to-gray-300 p-8">
+//       <h1 className="text-4xl font-bold text-gray-800 mb-6">Body Scanning</h1>
+      
+//       <div className="w-3/4 h-96 border-4 border-blue-500 flex items-center justify-center bg-white shadow-xl rounded-lg transition-transform transform hover:scale-105">
+//         {scanning ? (
+//           <p className="text-lg font-semibold text-gray-600 animate-pulse">
+//             Scanning in progress...
+//           </p>
+//         ) : (
+//           <p className="text-lg font-semibold text-green-600">Scan Complete!</p>
+//         )}
+//       </div>
+
+//       {errorMessage && <p className="text-red-600 mt-4 font-medium">{errorMessage}</p>}
+//     </div>
+//   );
+// };
+
+// export default ScanPage;
+
+
+
+
+
+
+
+
+
+
+
+
+
