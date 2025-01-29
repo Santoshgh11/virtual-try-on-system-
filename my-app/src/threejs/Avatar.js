@@ -1,34 +1,30 @@
-import React, { useRef, useEffect } from 'react';
-import * as THREE from 'three';
+import * as THREE from 'three'; // Import THREE
+import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader';
 
-const Avatar = ({ bodyData }) => {
-  const mountRef = useRef(null);
+let mixer; // For animations
 
-  useEffect(() => {
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    mountRef.current.appendChild(renderer.domElement);
+export function loadHumanModel(scene) {
+    const loader = new FBXLoader();
 
-    // Render the 3D avatar using body data
-    const geometry = new THREE.BoxGeometry();
-    const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-    const cube = new THREE.Mesh(geometry, material);
-    scene.add(cube);
-    camera.position.z = 5;
+    loader.load(
+        '/assets/models/human_model.fbx', // Path to the .fbx file
+        (fbx) => {
+            fbx.scale.set(0.01, 0.01, 0.01); // Scale the model
+            fbx.position.set(0, 0, 0); // Center the model
+            scene.add(fbx);
 
-    const animate = () => {
-      requestAnimationFrame(animate);
-      cube.rotation.x += 0.01;
-      cube.rotation.y += 0.01;
-      renderer.render(scene, camera);
-    };
+            if (fbx.animations && fbx.animations.length > 0) {
+                mixer = new THREE.AnimationMixer(fbx); // Initialize the animation mixer
+                fbx.animations.forEach((clip) => mixer.clipAction(clip).play()); // Play animations
+            }
+        },
+        undefined,
+        (error) => {
+            console.error('Error loading the FBX model:', error);
+        }
+    );
+}
 
-    animate();
-  }, []);
-
-  return <div ref={mountRef}></div>;
-};
-
-export default Avatar;
+export function updateAnimation(deltaTime) {
+    if (mixer) mixer.update(deltaTime); // Update animations
+}
