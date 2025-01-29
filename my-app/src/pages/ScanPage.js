@@ -157,67 +157,67 @@
 
 
 
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import CameraScanner from '../components/CameraScanner/CameraScanner';
-import { scanBody } from '../services/api'; // Import the scanBody API function
+// import React, { useEffect, useState } from 'react';
+// import { useNavigate } from 'react-router-dom';
+// import CameraScanner from '../components/CameraScanner/CameraScanner';
+// import { scanBody } from '../services/api'; // Import the scanBody API function
 
-const ScanPage = () => {
-  const [scanningComplete, setScanningComplete] = useState(false);
-  const [errorMessage, setErrorMessage] = useState(null);
-  const navigate = useNavigate();
+// const ScanPage = () => {
+//   const [scanningComplete, setScanningComplete] = useState(false);
+//   const [errorMessage, setErrorMessage] = useState(null);
+//   const navigate = useNavigate();
 
-  useEffect(() => {
-    // Simulate body scanning process for 10 seconds
-    const timer = setTimeout(async () => {
-      try {
-        // Example scan data (replace with actual CameraScanner data if available)
-        const exampleScanData = {
-          height: 170,
-          weight: 65,
-          dimensions: { chest: 90, waist: 70, hips: 95 },
-        };
+//   useEffect(() => {
+//     // Simulate body scanning process for 10 seconds
+//     const timer = setTimeout(async () => {
+//       try {
+//         // Example scan data (replace with actual CameraScanner data if available)
+//         const exampleScanData = {
+//           height: 170,
+//           weight: 65,
+//           dimensions: { chest: 90, waist: 70, hips: 95 },
+//         };
 
-        // Send scan data to the backend
-        const scanResponse = await scanBody(exampleScanData);
+//         // Send scan data to the backend
+//         const scanResponse = await scanBody(exampleScanData);
 
-        if (scanResponse) {
-          // Redirect to SuggestionsPage with preferences and AI recommendations
-          navigate('/suggestions', { state: { preferences: ['casual', 'formal'], scanResponse } });
-        } else {
-          throw new Error('Failed to process scan response.');
-        }
-      } catch (error) {
-        console.error('Error during scanning:', error);
-        setErrorMessage('Failed to process the scan. Please try again.');
-      } finally {
-        setScanningComplete(true); // Mark scanning as complete
-      }
-    }, 5000);
+//         if (scanResponse) {
+//           // Redirect to SuggestionsPage with preferences and AI recommendations
+//           navigate('/suggestions', { state: { preferences: ['casual', 'formal'], scanResponse } });
+//         } else {
+//           throw new Error('Failed to process scan response.');
+//         }
+//       } catch (error) {
+//         console.error('Error during scanning:', error);
+//         setErrorMessage('Failed to process the scan. Please try again.');
+//       } finally {
+//         setScanningComplete(true); // Mark scanning as complete
+//       }
+//     }, 5000);
 
-    return () => clearTimeout(timer); // Clean up the timer
-  }, [navigate]);
+//     return () => clearTimeout(timer); // Clean up the timer
+//   }, [navigate]);
 
-  return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 text-gray-800">
-      <h1 className="text-5xl font-bold mb-6">Body Scanning</h1>
-      <div className="w-full max-w-4xl border-4 border-blue-500 rounded-lg overflow-hidden shadow-lg">
-        <CameraScanner />
-      </div>
-      {!scanningComplete ? (
-        <p className="mt-4 text-lg">Scanning in progress... Please wait.</p>
-      ) : errorMessage ? (
-        <p className="mt-4 text-red-600 font-semibold">{errorMessage}</p>
-      ) : (
-        <p className="mt-4 text-xl font-bold text-green-600">
-          Face Registration and Body Scanning were done successfully!
-        </p>
-      )}
-    </div>
-  );
-};
+//   return (
+//     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 text-gray-800">
+//       <h1 className="text-5xl font-bold mb-6">Body Scanning</h1>
+//       <div className="w-full max-w-4xl border-4 border-blue-500 rounded-lg overflow-hidden shadow-lg">
+//         <CameraScanner />
+//       </div>
+//       {!scanningComplete ? (
+//         <p className="mt-4 text-lg">Scanning in progress... Please wait.</p>
+//       ) : errorMessage ? (
+//         <p className="mt-4 text-red-600 font-semibold">{errorMessage}</p>
+//       ) : (
+//         <p className="mt-4 text-xl font-bold text-green-600">
+//           Face Registration and Body Scanning were done successfully!
+//         </p>
+//       )}
+//     </div>
+//   );
+// };
 
-export default ScanPage;
+// export default ScanPage;
 
 
 
@@ -289,6 +289,54 @@ export default ScanPage;
 
 
 
+
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+
+const ScanPage = () => {
+  const navigate = useNavigate();
+  const [scanning, setScanning] = useState(false);
+  const [scanComplete, setScanComplete] = useState(false);
+
+  const handleStartScan = () => {
+    setScanning(true);
+    setTimeout(() => {
+      setScanning(false);
+      setScanComplete(true);
+    }, 3000); // Simulating a 3-second scanning process
+  };
+
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 text-gray-800">
+      <h1 className="text-4xl font-bold mb-6">Body Scanning</h1>
+
+      {!scanning && !scanComplete && (
+        <button
+          onClick={handleStartScan}
+          className="bg-blue-500 text-white px-6 py-3 rounded-lg shadow-lg hover:bg-blue-600 transition"
+        >
+          Start Scanning
+        </button>
+      )}
+
+      {scanning && <p className="text-xl font-semibold">Scanning in progress...</p>}
+
+      {scanComplete && (
+        <div className="flex flex-col items-center">
+          <p className="text-xl text-green-600 font-semibold mb-4">Scan Completed!</p>
+          <button
+            onClick={() => navigate('/try-on')}
+            className="bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg hover:bg-green-600 transition"
+          >
+            Proceed to Virtual Try-On
+          </button>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default ScanPage;
 
 
 
