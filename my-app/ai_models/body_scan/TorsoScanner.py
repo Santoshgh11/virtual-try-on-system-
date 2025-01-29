@@ -31,16 +31,12 @@ def create_polygon(points, frame, color=(0, 255, 255)):
 def get_torso_with_polygon(frame, face_width_cm=17, adjustment_factor=0.5):
     """
     Detects torso landmarks, calculates dimensions, and creates a polygon for the waist area.
-    Args:
-        frame: The input frame from the webcam.
-        face_width_cm: Average human face width in cm (used for pixel-to-cm scaling).
-        adjustment_factor: Multiplier to scale calculated dimensions to match realistic proportions.
-    Returns:
-        Torso length (cm), torso width (cm), and the modified frame with annotations.
+    Ensures lines representing torso dimensions are drawn on the frame.
     """
     frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)  # Convert frame to RGB for MediaPipe
     results = pose.process(frame_rgb)  # Process the frame with MediaPipe Pose
 
+    annotated_frame = frame.copy()  # Annotated frame to display
     if results.pose_landmarks:
         landmarks = results.pose_landmarks.landmark
 
@@ -57,8 +53,13 @@ def get_torso_with_polygon(frame, face_width_cm=17, adjustment_factor=0.5):
         left_hip_px = (int(left_hip.x * width), int(left_hip.y * height))
         right_hip_px = (int(right_hip.x * width), int(right_hip.y * height))
 
+        # Draw lines for torso dimensions
+        cv2.line(annotated_frame, left_shoulder_px, right_shoulder_px, (255, 0, 0), 2)  # Shoulder line
+        cv2.line(annotated_frame, left_shoulder_px, left_hip_px, (0, 255, 0), 2)       # Left torso length
+        cv2.line(annotated_frame, right_shoulder_px, right_hip_px, (0, 255, 0), 2)     # Right torso length
+
         # Calculate dimensions in pixels
-        torso_width_px = calculate_distance(left_shoulder_px, right_shoulder_px)  # Shoulder-to-shoulder width
+        torso_width_px = calculate_distance(left_shoulder_px, right_shoulder_px)
         torso_length_px = (calculate_distance(left_shoulder_px, left_hip_px) +
                            calculate_distance(right_shoulder_px, right_hip_px)) / 2  # Average torso length
 
@@ -75,23 +76,15 @@ def get_torso_with_polygon(frame, face_width_cm=17, adjustment_factor=0.5):
         torso_length_cm = torso_length_px * px_to_cm_ratio * adjustment_factor
 
         # Annotate the frame with measurements
-        annotated_frame = frame.copy()
-        cv2.line(annotated_frame, left_shoulder_px, right_shoulder_px, (0, 255, 0), 2)  # Torso width line
-        cv2.line(annotated_frame, left_shoulder_px, left_hip_px, (0, 0, 255), 2)  # Left torso length line
-        cv2.line(annotated_frame, right_shoulder_px, right_hip_px, (0, 0, 255), 2)  # Right torso length line
-
-        # Draw the torso polygon (shoulders and hips)
-        create_polygon([left_shoulder_px, right_shoulder_px, right_hip_px, left_hip_px], annotated_frame)
-
-        # Display the measurements on the frame
         cv2.putText(annotated_frame, f"Torso Width: {torso_width_cm:.2f} cm",
-                    (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 0, 0), 2)
+                    (50, 160), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 0), 2)
         cv2.putText(annotated_frame, f"Torso Length: {torso_length_cm:.2f} cm",
-                    (50, 80), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 0, 0), 2)
+                    (50, 200), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 0), 2)
 
         return torso_length_cm, torso_width_cm, annotated_frame
 
-    return None, None, frame
+    return None, None, annotated_frame
+
 
 def main():
     cap = cv2.VideoCapture(0)  # Open webcam feed
