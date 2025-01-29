@@ -157,73 +157,6 @@
 
 
 
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import CameraScanner from '../components/CameraScanner/CameraScanner';
-import { scanBody } from '../services/api'; // Import the scanBody API function
-
-const ScanPage = () => {
-  const [scanningComplete, setScanningComplete] = useState(false);
-  const [errorMessage, setErrorMessage] = useState(null);
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    // Simulate body scanning process for 10 seconds
-    const timer = setTimeout(async () => {
-      try {
-        // Example scan data (replace with actual CameraScanner data if available)
-        const exampleScanData = {
-          height: 170,
-          weight: 65,
-          dimensions: { chest: 90, waist: 70, hips: 95 },
-        };
-
-        // Send scan data to the backend
-        const scanResponse = await scanBody(exampleScanData);
-
-        if (scanResponse) {
-          // Redirect to SuggestionsPage with preferences and AI recommendations
-          navigate('/suggestions', { state: { preferences: ['casual', 'formal'], scanResponse } });
-        } else {
-          throw new Error('Failed to process scan response.');
-        }
-      } catch (error) {
-        console.error('Error during scanning:', error);
-        setErrorMessage('Failed to process the scan. Please try again.');
-      } finally {
-        setScanningComplete(true); // Mark scanning as complete
-      }
-    }, 5000);
-
-    return () => clearTimeout(timer); // Clean up the timer
-  }, [navigate]);
-
-  return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 text-gray-800">
-      <h1 className="text-5xl font-bold mb-6">Body Scanning</h1>
-      <div className="w-full max-w-4xl border-4 border-blue-500 rounded-lg overflow-hidden shadow-lg">
-        <CameraScanner />
-      </div>
-      {!scanningComplete ? (
-        <p className="mt-4 text-lg">Scanning in progress... Please wait.</p>
-      ) : errorMessage ? (
-        <p className="mt-4 text-red-600 font-semibold">{errorMessage}</p>
-      ) : (
-        <p className="mt-4 text-xl font-bold text-green-600">
-          Face Registration and Body Scanning were done successfully!
-        </p>
-      )}
-    </div>
-  );
-};
-
-export default ScanPage;
-
-
-
-
-
-
 // import React, { useState, useEffect } from 'react';
 // import { useNavigate } from 'react-router-dom';
 
@@ -288,10 +221,236 @@ export default ScanPage;
 // export default ScanPage;
 
 
+// import React, { useEffect, useState } from 'react';
+// import { useNavigate } from 'react-router-dom';
+// import CameraScanner from '../components/CameraScanner/CameraScanner';
+// import { scanBody } from '../services/api'; // Import the scanBody API function
+
+// const ScanPage = () => {
+//   const [scanningComplete, setScanningComplete] = useState(false);
+//   const [errorMessage, setErrorMessage] = useState(null);
+//   const navigate = useNavigate();
+
+//   useEffect(() => {
+//     // Simulate body scanning process for 10 seconds
+//     const timer = setTimeout(async () => {
+//       try {
+//         // Example scan data (replace with actual CameraScanner data if available)
+//         const exampleScanData = {
+//           height: 170,
+//           weight: 65,
+//           dimensions: { chest: 90, waist: 70, hips: 95 },
+//         };
+
+//         // Send scan data to the backend
+//         const scanResponse = await scanBody(exampleScanData);
+
+//         if (scanResponse) {
+//           // Redirect to SuggestionsPage with preferences and AI recommendations
+//           navigate('/suggestions', { state: { preferences: ['casual', 'formal'], scanResponse } });
+//         } else {
+//           throw new Error('Failed to process scan response.');
+//         }
+//       } catch (error) {
+//         console.error('Error during scanning:', error);
+//         setErrorMessage('Failed to process the scan. Please try again.');
+//       } finally {
+//         setScanningComplete(true); // Mark scanning as complete
+//       }
+//     }, 5000);
+
+//     return () => clearTimeout(timer); // Clean up the timer
+//   }, [navigate]);
+
+//   return (
+//     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 text-gray-800">
+//       <h1 className="text-5xl font-bold mb-6">Body Scanning</h1>
+//       <div className="w-full max-w-4xl border-4 border-blue-500 rounded-lg overflow-hidden shadow-lg">
+//         <CameraScanner />
+//       </div>
+//       {!scanningComplete ? (
+//         <p className="mt-4 text-lg">Scanning in progress... Please wait.</p>
+//       ) : errorMessage ? (
+//         <p className="mt-4 text-red-600 font-semibold">{errorMessage}</p>
+//       ) : (
+//         <p className="mt-4 text-xl font-bold text-green-600">
+//           Face Registration and Body Scanning were done successfully!
+//         </p>
+//       )}
+//     </div>
+//   );
+// };
+
+// export default ScanPage;
+
+
+
+// import React, { useEffect, useState } from "react";
+// import { useNavigate } from "react-router-dom";
+// import CameraScanner from "../components/CameraScanner/CameraScanner";
+// import { scanBody } from "../services/api"; // Import the scanBody API function
+// import axios from "axios";
+
+// const ScanPage = () => {
+//   const [scanningComplete, setScanningComplete] = useState(false);
+//   const [errorMessage, setErrorMessage] = useState(null);
+//   const navigate = useNavigate();
+
+//   useEffect(() => {
+//     const startScan = async () => {
+//       try {
+//         // Start AI measurement process from backend
+//         const response = await axios.post("http://localhost:5000/api/scan");
+
+//         if (response.data.success) {
+//           console.log("Measurements saved:", response.data.data);
+//           const scanResponse = response.data.data;
+
+//           // Redirect to SuggestionsPage with AI-generated preferences
+//           navigate("/suggestions", { state: { preferences: ["casual", "formal"], scanResponse } });
+//         } else {
+//           throw new Error("Failed to process scan response.");
+//         }
+//       } catch (error) {
+//         console.error("Error during scanning:", error);
+//         setErrorMessage("Failed to process the scan. Please try again.");
+//       } finally {
+//         setScanningComplete(true); // Mark scanning as complete
+//       }
+//     };
+
+//     // Simulate scanning delay for 5 seconds, then trigger backend AI processing
+//     const timer = setTimeout(startScan, 5000);
+
+//     return () => clearTimeout(timer); // Clean up the timer
+//   }, [navigate]);
+
+//   return (
+//     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 text-gray-800">
+//       <h1 className="text-5xl font-bold mb-6">Body Scanning</h1>
+//       <div className="w-full max-w-4xl border-4 border-blue-500 rounded-lg overflow-hidden shadow-lg">
+//         <CameraScanner />
+//       </div>
+//       {!scanningComplete ? (
+//         <p className="mt-4 text-lg">Scanning in progress... Please wait.</p>
+//       ) : errorMessage ? (
+//         <p className="mt-4 text-red-600 font-semibold">{errorMessage}</p>
+//       ) : (
+//         <p className="mt-4 text-xl font-bold text-green-600">
+//           Face Registration and Body Scanning were done successfully!
+//         </p>
+//       )}
+//     </div>
+//   );
+// };
+
+// export default ScanPage;
 
 
 
 
+// import React, { useState } from "react";
+// import { useNavigate } from "react-router-dom";
+// import CameraScanner from "../components/CameraScanner/CameraScanner";
+// import { scanBody } from "../services/api"; 
+
+// const ScanPage = () => {
+//   const [scanComplete, setScanComplete] = useState(false);
+//   const [scanData, setScanData] = useState(null);
+//   const [errorMessage, setErrorMessage] = useState(null);
+//   const navigate = useNavigate();
+
+//   const handleScanComplete = async (imageData) => {
+//     try {
+//       setErrorMessage(null);
+//       const response = await scanBody({ image: imageData });
+
+//       if (response.success) {
+//         console.log("Scan successful:", response);
+//         setScanComplete(true);
+//         setScanData(response); // Store scan data
+//       } else {
+//         throw new Error("Failed to process scan.");
+//       }
+//     } catch (error) {
+//       console.error("Error during scanning:", error);
+//       setErrorMessage("Failed to process the scan. Please try again.");
+//     }
+//   };
+
+//   const handleProceed = () => {
+//     if (scanComplete) {
+//       navigate("/ai-recommendations", { state: { scanResponse: scanData } });
+//     }
+//   };
+
+//   return (
+//     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 text-gray-800">
+//       <h1 className="text-4xl font-bold mb-6">Body Scanning</h1>
+//       <CameraScanner onScanComplete={handleScanComplete} />
+      
+//       {errorMessage && <p className="mt-4 text-red-600 font-semibold">{errorMessage}</p>}
+
+//       {scanComplete && (
+//         <button 
+//           onClick={handleProceed} 
+//           className="mt-4 bg-green-500 text-white px-6 py-2 rounded"
+//         >
+//           Proceed to AI Recommendations
+//         </button>
+//       )}
+//     </div>
+//   );
+// };
+
+// export default ScanPage;
+
+
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import CameraScanner from "../components/CameraScanner/CameraScanner";
+import { scanBody } from "../services/api";
+
+const ScanPage = () => {
+  const [scanComplete, setScanComplete] = useState(false);
+  const [scanData, setScanData] = useState(null);
+  const [errorMessage, setErrorMessage] = useState(null);
+  const navigate = useNavigate();
+
+  const handleScanComplete = async (imageData) => {
+    try {
+      setErrorMessage(null);
+      const response = await scanBody({ image: imageData });
+
+      if (response.success) {
+        console.log("Scan successful:", response);
+        setScanComplete(true);
+        setScanData(response);
+
+        // Redirect to AI Recommendations Page after scanning
+        setTimeout(() => {
+          navigate("/ai-recommendations", { state: { scanResponse: response } });
+        }, 2000);
+      } else {
+        throw new Error("Failed to process scan.");
+      }
+    } catch (error) {
+      console.error("Error during scanning:", error);
+      setErrorMessage("Failed to process the scan. Please try again.");
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 text-gray-800">
+      <h1 className="text-4xl font-bold mb-6">Body Scanning</h1>
+      <CameraScanner onScanComplete={handleScanComplete} />
+      
+      {errorMessage && <p className="mt-4 text-red-600 font-semibold">{errorMessage}</p>}
+    </div>
+  );
+};
+
+export default ScanPage;
 
 
 
