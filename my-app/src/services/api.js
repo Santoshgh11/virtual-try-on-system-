@@ -8,6 +8,13 @@
 
 
 // services/api.js (already defined)
+
+
+
+
+
+
+
 // import axios from 'axios';
 
 // const API = axios.create({
@@ -29,22 +36,26 @@
 
 
 
-import axios from "axios";
+import axios from 'axios';
 
 const API = axios.create({
-  baseURL: "http://localhost:5000/api", // Replace with your backend URL
+  baseURL: 'http://localhost:5000/api', // Node.js Backend API
+});
+
+const AI_SERVER = axios.create({
+  baseURL: 'http://localhost:5001/api', // Flask AI Model API
 });
 
 export default API;
 
-// ✅ Your existing scanBody function (No changes)
+// Body Scan API - Send data to Flask AI Model
 export const scanBody = async (scanData) => {
   try {
-    const response = await API.post("/body-scan", scanData);
-    return response.data; // Return the processed response
+    const response = await AI_SERVER.post('/body-scan', scanData);
+    return response.data;
   } catch (error) {
-    console.error("Error scanning body:", error);
-    throw error; // Throw error to handle it in the component
+    console.error('Error scanning body:', error);
+    throw error;
   }
 };
 
