@@ -61,62 +61,92 @@ def save_dimensions(data, file_path):
         print(f"Error saving dimensions: {e}")
 
 def get_arm_length(frame, face_width_cm=16, adjustment_factor=0.6):
-    """
-    Measures the arm length (shoulder to wrist) in centimeters.
-    Args:
-        frame: The input frame from the webcam.
-        face_width_cm: Average human face width in cm (used for pixel-to-cm scaling).
-        adjustment_factor: Scaling factor to adjust calculated dimensions.
-    Returns:
-        Arm length in centimeters and the modified frame with annotations.
-    """
     frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
     results = pose.process(frame_rgb)
 
+    annotated_frame = frame.copy()
     if results.pose_landmarks:
         landmarks = results.pose_landmarks.landmark
 
-        # Extract arm-related landmarks (shoulder, elbow, wrist)
+        # Extract arm-related landmarks
         left_shoulder = landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER]
         left_elbow = landmarks[mp_pose.PoseLandmark.LEFT_ELBOW]
         left_wrist = landmarks[mp_pose.PoseLandmark.LEFT_WRIST]
 
-        # Convert normalized coordinates to pixels
         height, width, _ = frame.shape
         shoulder_px = (int(left_shoulder.x * width), int(left_shoulder.y * height))
         elbow_px = (int(left_elbow.x * width), int(left_elbow.y * height))
         wrist_px = (int(left_wrist.x * width), int(left_wrist.y * height))
 
-        # Calculate distances in pixels with smoothing (new functionality)
-        shoulder_to_elbow_px = smoothed_distance(shoulder_px, elbow_px)
-        elbow_to_wrist_px = smoothed_distance(elbow_px, wrist_px)
+        shoulder_to_elbow_px = calculate_distance(shoulder_px, elbow_px)
+        elbow_to_wrist_px = calculate_distance(elbow_px, wrist_px)
         arm_length_px = shoulder_to_elbow_px + elbow_to_wrist_px
 
-        # Use face width to convert pixels to centimeters
-        face_landmarks = [mp_pose.PoseLandmark.NOSE, mp_pose.PoseLandmark.LEFT_EAR]
-        face_px_distance = calculate_distance(
-            (int(landmarks[face_landmarks[0]].x * width), int(landmarks[face_landmarks[0]].y * height)),
-            (int(landmarks[face_landmarks[1]].x * width), int(landmarks[face_landmarks[1]].y * height))
+        # Convert to centimeters
+        px_to_cm_ratio = face_width_cm / calculate_distance(
+            (int(landmarks[mp_pose.PoseLandmark.NOSE].x * width),
+             int(landmarks[mp_pose.PoseLandmark.NOSE].y * height)),
+            (int(landmarks[mp_pose.PoseLandmark.LEFT_EAR].x * width),
+             int(landmarks[mp_pose.PoseLandmark.LEFT_EAR].y * height))
         )
-
-        px_to_cm_ratio = face_width_cm / face_px_distance
-
-        # Apply scaling adjustment to the calculated arm length
         arm_length_cm = arm_length_px * px_to_cm_ratio * adjustment_factor
 
-        # Round the final result to two decimal places (new functionality)
-        arm_length_cm = round(arm_length_cm, 2)
-
         # Annotate the frame
-        annotated_frame = frame.copy()
         cv2.line(annotated_frame, shoulder_px, elbow_px, (0, 255, 0), 2)
         cv2.line(annotated_frame, elbow_px, wrist_px, (0, 255, 0), 2)
         cv2.putText(annotated_frame, f"Arm Length: {arm_length_cm:.2f} cm",
-                    (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 0, 0), 2)
+                    (50, 120), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2)
 
         return arm_length_cm, annotated_frame
 
-    return None, frame
+    return None, annotated_frame
+def get_arm_length(frame, face_width_cm=16, adjustment_factor=0.6):
+    """
+    Measures the arm length (shoulder to wrist) in centimeters.
+    Also draws lines connecting the shoulder, elbow, and wrist.
+    """
+    frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    results = pose.process(frame_rgb)
+
+    annotated_frame = frame.copy()
+    if results.pose_landmarks:
+        landmarks = results.pose_landmarks.landmark
+
+        # Extract arm-related landmarks
+        left_shoulder = landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER]
+        left_elbow = landmarks[mp_pose.PoseLandmark.LEFT_ELBOW]
+        left_wrist = landmarks[mp_pose.PoseLandmark.LEFT_WRIST]
+
+        height, width, _ = frame.shape
+        shoulder_px = (int(left_shoulder.x * width), int(left_shoulder.y * height))
+        elbow_px = (int(left_elbow.x * width), int(left_elbow.y * height))
+        wrist_px = (int(left_wrist.x * width), int(left_wrist.y * height))
+
+        # Draw lines connecting the landmarks
+        cv2.line(annotated_frame, shoulder_px, elbow_px, (0, 255, 0), 2)  # Green line: shoulder to elbow
+        cv2.line(annotated_frame, elbow_px, wrist_px, (0, 255, 0), 2)     # Green line: elbow to wrist
+
+        # Calculate distances in pixels
+        shoulder_to_elbow_px = calculate_distance(shoulder_px, elbow_px)
+        elbow_to_wrist_px = calculate_distance(elbow_px, wrist_px)
+        arm_length_px = shoulder_to_elbow_px + elbow_to_wrist_px
+
+        # Convert to centimeters
+        px_to_cm_ratio = face_width_cm / calculate_distance(
+            (int(landmarks[mp_pose.PoseLandmark.NOSE].x * width),
+             int(landmarks[mp_pose.PoseLandmark.NOSE].y * height)),
+            (int(landmarks[mp_pose.PoseLandmark.LEFT_EAR].x * width),
+             int(landmarks[mp_pose.PoseLandmark.LEFT_EAR].y * height))
+        )
+        arm_length_cm = arm_length_px * px_to_cm_ratio * adjustment_factor
+
+        # Annotate the frame
+        cv2.putText(annotated_frame, f"Arm Length: {arm_length_cm:.2f} cm",
+                    (50, 120), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 0), 2)
+
+        return arm_length_cm, annotated_frame
+
+    return None, annotated_frame
 
 def main():
     cap = cv2.VideoCapture(0)  # Open webcam feed

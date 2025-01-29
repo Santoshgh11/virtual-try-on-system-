@@ -157,64 +157,64 @@
 
 
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import CameraScanner from '../components/CameraScanner/CameraScanner';
-import { scanBody } from '../services/api'; // Import the scanBody API function
 
-const ScanPage = () => {
-  const [scanningComplete, setScanningComplete] = useState(false);
-  const [errorMessage, setErrorMessage] = useState(null);
-  const navigate = useNavigate();
+const ScanPage = ({ setScanningComplete }) => {
+    const [scanning, setScanning] = useState(false); // ✅ Track scanning status
+    const navigate = useNavigate();
 
-  useEffect(() => {
-    // Simulate body scanning process for 10 seconds
-    const timer = setTimeout(async () => {
-      try {
-        // Example scan data (replace with actual CameraScanner data if available)
-        const exampleScanData = {
-          height: 170,
-          weight: 65,
-          dimensions: { chest: 90, waist: 70, hips: 95 },
-        };
-
-        // Send scan data to the backend
-        const scanResponse = await scanBody(exampleScanData);
-
-        if (scanResponse) {
-          // Redirect to SuggestionsPage with preferences and AI recommendations
-          navigate('/suggestions', { state: { preferences: ['casual', 'formal'], scanResponse } });
-        } else {
-          throw new Error('Failed to process scan response.');
+    // ✅ Start the scanning process by calling Flask API
+    const startScanning = async () => {
+        setScanning(true);
+        try {
+            const response = await fetch("http://localhost:5000/start-scanning");
+            const data = await response.json();
+            console.log(data.message);
+        } catch (error) {
+            console.error("Error starting scan:", error);
         }
-      } catch (error) {
-        console.error('Error during scanning:', error);
-        setErrorMessage('Failed to process the scan. Please try again.');
-      } finally {
-        setScanningComplete(true); // Mark scanning as complete
-      }
-    }, 10000);
+    };
 
-    return () => clearTimeout(timer); // Clean up the timer
-  }, [navigate]);
+    // ✅ Stop scanning and fetch measurements
+    const stopScanning = async () => {
+        try {
+            const response = await fetch("http://localhost:5000/stop-scanning");
+            const data = await response.json();
+            console.log(data.message);
+            
+            // ✅ Once scanning is stopped, update state & navigate to 3D model
+            setScanningComplete(true);
+            navigate('/3d-model'); // ✅ Redirect to 3D Model page
+        } catch (error) {
+            console.error("Error stopping scan:", error);
+        }
+    };
 
-  return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 text-gray-800">
-      <h1 className="text-5xl font-bold mb-6">Body Scanning</h1>
-      <div className="w-full max-w-4xl border-4 border-blue-500 rounded-lg overflow-hidden shadow-lg">
-        <CameraScanner />
-      </div>
-      {!scanningComplete ? (
-        <p className="mt-4 text-lg">Scanning in progress... Please wait.</p>
-      ) : errorMessage ? (
-        <p className="mt-4 text-red-600 font-semibold">{errorMessage}</p>
-      ) : (
-        <p className="mt-4 text-xl font-bold text-green-600">
-          Face Registration and Body Scanning were done successfully!
-        </p>
-      )}
-    </div>
-  );
+    return (
+        <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 text-gray-800">
+            <h1 className="text-5xl font-bold mb-6">Body Scanning</h1>
+            <p className="mt-4 text-lg">Click start to begin scanning</p>
+
+            <div className="mt-6 flex gap-4">
+                <button 
+                    onClick={startScanning} 
+                    disabled={scanning} // ✅ Disable while scanning
+                    className="px-6 py-2 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700"
+                >
+                    {scanning ? "Scanning..." : "Start Scanning"}
+                </button>
+                <button 
+                    onClick={stopScanning} 
+                    disabled={!scanning} // ✅ Disable if not scanning
+                    className="px-6 py-2 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700"
+                >
+                    Stop Scanning
+                </button>
+            </div>
+        </div>
+    );
 };
 
 export default ScanPage;
+
